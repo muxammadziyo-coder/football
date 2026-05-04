@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>⚽ FUTBOL | REALISTIK FIZIKA</title>
+    <title>⚽ FUTBOL | GOL TO'G'RI ISHLAYDI</title>
     <style>
         * {
             margin: 0;
@@ -97,69 +97,39 @@
         .score-p1 { color: #88bbff; }
         .score-p2 { color: #ff8888; }
 
-        /* Joystick P1 - Chap */
-        .joy-p1 {
+        .joy-p1, .joy-p2 {
             position: fixed;
             bottom: 20px;
-            left: 20px;
             width: 120px;
             height: 120px;
             border-radius: 50%;
-            background: rgba(59,130,246,0.3);
-            border: 3px solid #3b82f6;
+            background: rgba(0,0,0,0.3);
+            border: 3px solid;
             touch-action: none;
             z-index: 100;
         }
-        .joy-base-p1 {
+        .joy-p1 { left: 20px; border-color: #3b82f6; }
+        .joy-p2 { right: 20px; border-color: #ef4444; }
+        
+        .joy-base-p1, .joy-base-p2 {
             position: absolute;
             width: 100%;
             height: 100%;
             border-radius: 50%;
             background: rgba(0,0,0,0.4);
         }
-        .joy-thumb-p1 {
+        .joy-thumb-p1, .joy-thumb-p2 {
             position: absolute;
             width: 50px;
             height: 50px;
-            background: #3b82f6;
             border-radius: 50%;
             top: 35px;
             left: 35px;
             transition: transform 0.02s;
         }
+        .joy-thumb-p1 { background: #3b82f6; }
+        .joy-thumb-p2 { background: #ef4444; }
 
-        /* Joystick P2 - O'ng */
-        .joy-p2 {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: rgba(239,68,68,0.3);
-            border: 3px solid #ef4444;
-            touch-action: none;
-            z-index: 100;
-        }
-        .joy-base-p2 {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: rgba(0,0,0,0.4);
-        }
-        .joy-thumb-p2 {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            background: #ef4444;
-            border-radius: 50%;
-            top: 35px;
-            left: 35px;
-            transition: transform 0.02s;
-        }
-
-        /* Tugmalar */
         .buttons {
             position: fixed;
             bottom: 20px;
@@ -202,6 +172,14 @@
         }
         .restart { right: 15px; }
         .back { left: 15px; }
+
+        @media (max-width: 600px) {
+            .joy-p1, .joy-p2 { width: 100px; height: 100px; }
+            .joy-thumb-p1, .joy-thumb-p2 { width: 42px; height: 42px; top: 29px; left: 29px; }
+            .buttons-p1 { left: 140px; }
+            .buttons-p2 { right: 140px; }
+            .btn { width: 55px; height: 55px; font-size: 0.7rem; }
+        }
     </style>
 </head>
 <body>
@@ -216,7 +194,7 @@
 </div>
 
 <div id="game" style="display:none; width:100%; height:100%; position:relative;">
-    <canvas id="canvas" style="width:100%; height:100%; display:block; background:#1b7943;"></canvas>
+    <canvas id="canvas" style="width:100%; height:100%; display:block;"></canvas>
     
     <div class="score-panel">
         <div class="score score-p1">🔵 <span id="score1">0</span></div>
@@ -250,7 +228,6 @@
 
 <script>
     (function(){
-        // ========== O'LCHAMLAR ==========
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         
@@ -258,60 +235,49 @@
         let fieldL, fieldR, fieldT, fieldB;
         let goalL, goalR, goalTop, goalBottom;
         
-        // ========== O'YIN HOLATI ==========
         let gameRunning = false;
         let gameMode = '2p';
         let score1 = 0, score2 = 0;
         let matchTime = 120;
         let timerInterval = null;
         
-        // ========== FIZIKA ==========
         const P_RADIUS = 26;
         const B_RADIUS = 11;
         
-        // To'p - YOPISHMAYDI, faqat tepilganda uchadi
-        let ball = {
-            x: 0, y: 0, vx: 0, vy: 0,
-            r: B_RADIUS
-        };
-        
-        // O'yinchilar
+        let ball = { x: 0, y: 0, vx: 0, vy: 0, r: B_RADIUS };
         let p1 = { x: 0, y: 0, vx: 0, vy: 0, r: P_RADIUS, color: "#3b82f6" };
         let p2 = { x: 0, y: 0, vx: 0, vy: 0, r: P_RADIUS, color: "#ef4444" };
         
-        // Joystick vektorlari
         let joy1Vec = { x: 0, y: 0 };
         let joy2Vec = { x: 0, y: 0 };
         
-        // Kuchli zarba
         let power1Active = false, power1Charge = 0;
         let power2Active = false, power2Charge = 0;
         
-        // Effekt
         let goalFlash = 0;
-        let lastKickTime1 = 0;
-        let lastKickTime2 = 0;
         
-        // ========== O'LCHAMLARNI HISOBLASH ==========
+        // ========== O'LCHAMLAR ==========
         function resize() {
             W = window.innerWidth;
             H = window.innerHeight;
             canvas.width = W;
             canvas.height = H;
             
-            fieldL = Math.max(30, W * 0.04);
-            fieldR = W - fieldL;
-            fieldT = Math.max(30, H * 0.05);
-            fieldB = H - fieldT;
-            goalL = fieldL - 12;
-            goalR = fieldR + 12;
-            goalTop = H/2 - 55;
-            goalBottom = H/2 + 55;
+            fieldL = 40;
+            fieldR = W - 40;
+            fieldT = 40;
+            fieldB = H - 40;
+            
+            // DARVOZA ZONALARI - gol tekshirish uchun
+            goalL = fieldL - 15;
+            goalR = fieldR + 15;
+            goalTop = H/2 - 60;
+            goalBottom = H/2 + 60;
             
             resetPositions();
         }
         
-        window.addEventListener('resize', () => { resize(); });
+        window.addEventListener('resize', resize);
         
         function resetPositions() {
             ball.x = W/2;
@@ -319,18 +285,17 @@
             ball.vx = 0;
             ball.vy = 0;
             
-            p1.x = Math.max(fieldL + P_RADIUS, W * 0.18);
+            p1.x = Math.max(fieldL + P_RADIUS, W * 0.2);
             p1.y = H/2;
             p1.vx = 0;
             p1.vy = 0;
             
-            p2.x = Math.min(fieldR - P_RADIUS, W * 0.82);
+            p2.x = Math.min(fieldR - P_RADIUS, W * 0.8);
             p2.y = H/2;
             p2.vx = 0;
             p2.vy = 0;
         }
         
-        // ========== UI ==========
         function updateUI() {
             document.getElementById('score1').innerHTML = score1;
             document.getElementById('score2').innerHTML = score2;
@@ -371,8 +336,8 @@
         
         // ========== HARAKAT ==========
         function move(entity, mx, my, delta=1) {
-            const maxSpeed = 4.8;
-            const acc = 0.6;
+            const maxSpeed = 5.0;
+            const acc = 0.65;
             const dec = 0.96;
             
             if(mx !== 0 || my !== 0) {
@@ -391,14 +356,13 @@
             entity.x += entity.vx * delta;
             entity.y += entity.vy * delta;
             
-            let r = entity.r;
-            if(entity.x - r < fieldL) entity.x = fieldL + r;
-            if(entity.x + r > fieldR) entity.x = fieldR - r;
-            if(entity.y - r < fieldT) entity.y = fieldT + r;
-            if(entity.y + r > fieldB) entity.y = fieldB - r;
+            if(entity.x - entity.r < fieldL) entity.x = fieldL + entity.r;
+            if(entity.x + entity.r > fieldR) entity.x = fieldR - entity.r;
+            if(entity.y - entity.r < fieldT) entity.y = fieldT + entity.r;
+            if(entity.y + entity.r > fieldB) entity.y = fieldB - entity.r;
         }
         
-        // ========== O'YINCHILAR TO'QNASHUVI ==========
+        // O'yinchilar to'qnashuvi
         function collidePlayers() {
             let dx = p2.x - p1.x;
             let dy = p2.y - p1.y;
@@ -413,7 +377,6 @@
                 p2.x += Math.cos(angle) * overlap * 0.5;
                 p2.y += Math.sin(angle) * overlap * 0.5;
                 
-                // Momentum almashinuvi
                 let nx = dx / d;
                 let ny = dy / d;
                 let p = 2 * (p1.vx * nx + p1.vy * ny - p2.vx * nx - p2.vy * ny) / 2;
@@ -424,7 +387,7 @@
             }
         }
         
-        // ========== TO'P VA O'YINCHI TO'QNASHUVI ==========
+        // To'p va o'yinchi to'qnashuvi
         function collideBallWithPlayer(ball, player) {
             let dx = ball.x - player.x;
             let dy = ball.y - player.y;
@@ -432,13 +395,11 @@
             let minD = ball.r + player.r;
             
             if(d < minD) {
-                // To'pni itarib chiqarish
                 let angle = Math.atan2(dy, dx);
                 let overlap = minD - d;
                 ball.x += Math.cos(angle) * overlap;
                 ball.y += Math.sin(angle) * overlap;
                 
-                // To'pga zarba berish (o'yinchi tezligiga qarab)
                 let relVx = ball.vx - player.vx;
                 let relVy = ball.vy - player.vy;
                 let velAlong = relVx * Math.cos(angle) + relVy * Math.sin(angle);
@@ -448,62 +409,62 @@
                     let impulse = (1 + restitution) * velAlong;
                     ball.vx -= impulse * Math.cos(angle) * 0.9;
                     ball.vy -= impulse * Math.sin(angle) * 0.9;
-                    
-                    // O'yinchi harakatidan to'pga ta'sir
                     ball.vx += player.vx * 0.3;
                     ball.vy += player.vy * 0.3;
                 }
             }
         }
         
-        // ========== ZARBA - RAQIB DARVOZASIGA (YOPISHMAYDI) ==========
+        // ========== ZARBA - RAQIB DARVOZASIGA ==========
         function kickToEnemyGoal(player, isPower=false, charge=0) {
             if(!gameRunning) return;
             
-            // To'p o'yinchiga yaqinmi?
             let distToBall = Math.hypot(ball.x - player.x, ball.y - player.y);
-            if(distToBall > player.r + ball.r + 25) return;
+            if(distToBall > player.r + ball.r + 30) return;
             
-            // RAQIB DARVOZASIGA YO'NALISH
-            let angleToGoal;
+            let targetX, targetY;
             if(player === p1) {
-                // P1 -> o'ng darvoza (P2 darvozasi)
-                angleToGoal = Math.atan2(goalTop + 55 - ball.y, goalR - ball.x);
+                // P1 -> O'ng darvoza
+                targetX = goalR;
+                targetY = H/2;
             } else {
-                // P2 -> chap darvoza (P1 darvozasi)
-                angleToGoal = Math.atan2(goalTop + 55 - ball.y, goalL - ball.x);
+                // P2 -> Chap darvoza
+                targetX = goalL;
+                targetY = H/2;
             }
             
-            // Zarba kuchi
+            let dx = targetX - ball.x;
+            let dy = targetY - ball.y;
+            let len = Math.hypot(dx, dy);
+            if(len > 0) {
+                dx /= len;
+                dy /= len;
+            }
+            
             let force = isPower ? 9 + (charge / 100) * 8 : 7.5;
+            ball.vx = dx * force + player.vx * 0.2;
+            ball.vy = dy * force + player.vy * 0.2;
             
-            ball.vx = Math.cos(angleToGoal) * force + player.vx * 0.2;
-            ball.vy = Math.sin(angleToGoal) * force + player.vy * 0.2;
-            
-            // Ovoz effekti
             try { navigator.vibrate?.(40); } catch(e) {}
         }
         
-        // ========== O'G'IRLASH ==========
+        // O'g'irlash
         function stealBall(stealer, opponent) {
             if(!gameRunning) return;
             
             let distToBall = Math.hypot(ball.x - stealer.x, ball.y - stealer.y);
             let distOppToBall = Math.hypot(ball.x - opponent.x, ball.y - opponent.y);
             
-            // Agar to'p raqibga yaqin bo'lsa va o'g'irlovchi ham yaqin bo'lsa
-            if(distOppToBall < P_RADIUS + B_RADIUS + 15 && distToBall < P_RADIUS + B_RADIUS + 20) {
-                // To'pni itarib yuborish (o'g'irlash)
+            if(distOppToBall < P_RADIUS + B_RADIUS + 20 && distToBall < P_RADIUS + B_RADIUS + 25) {
                 let angle = Math.atan2(stealer.y - opponent.y, stealer.x - opponent.x);
                 let force = 6;
                 ball.vx = Math.cos(angle) * force + stealer.vx * 0.3;
                 ball.vy = Math.sin(angle) * force + stealer.vy * 0.3;
-                
                 try { navigator.vibrate?.(30); } catch(e) {}
             }
         }
         
-        // ========== TO'P FIZIKASI ==========
+        // To'p fizikasi
         function updateBall(delta) {
             ball.vx *= Math.pow(0.985, delta);
             ball.vy *= Math.pow(0.985, delta);
@@ -515,43 +476,45 @@
             ball.y += ball.vy * delta;
             
             // Devor bilan to'qnashuv
-            let r = ball.r;
-            if(ball.x - r < fieldL) { 
-                ball.x = fieldL + r; 
+            if(ball.x - ball.r < fieldL) { 
+                ball.x = fieldL + ball.r; 
                 ball.vx = -ball.vx * 0.85; 
             }
-            if(ball.x + r > fieldR) { 
-                ball.x = fieldR - r; 
+            if(ball.x + ball.r > fieldR) { 
+                ball.x = fieldR - ball.r; 
                 ball.vx = -ball.vx * 0.85; 
             }
-            if(ball.y - r < fieldT) { 
-                ball.y = fieldT + r; 
+            if(ball.y - ball.r < fieldT) { 
+                ball.y = fieldT + ball.r; 
                 ball.vy = -ball.vy * 0.85; 
             }
-            if(ball.y + r > fieldB) { 
-                ball.y = fieldB - r; 
+            if(ball.y + ball.r > fieldB) { 
+                ball.y = fieldB - ball.r; 
                 ball.vy = -ball.vy * 0.85; 
             }
         }
         
-        // ========== GOL TEKSHIRISH ==========
+        // ========== GOL TEKSHIRISH - TO'G'RILANGAN ==========
         function checkGoal() {
             if(goalFlash > 0) return;
             
-            // Chap darvoza -> P2 goli
-            if(ball.x - ball.r <= goalL + 10 && ball.y > goalTop && ball.y < goalBottom) {
+            // CHAP DARVOZA -> P2 GOLI (to'p chap tomonga kirsa, raqib goli)
+            if(ball.x - ball.r <= goalL + 15 && ball.y > goalTop && ball.y < goalBottom) {
+                console.log("GOAL! Left goal - Player 2 scores");
                 score2++;
                 updateUI();
-                goalFlash = 15;
+                goalFlash = 20;
                 resetPositions();
                 try { navigator.vibrate?.(200); } catch(e) {}
                 return;
             }
-            // O'ng darvoza -> P1 goli
-            if(ball.x + ball.r >= goalR - 10 && ball.y > goalTop && ball.y < goalBottom) {
+            
+            // O'NG DARVOZA -> P1 GOLI (to'p o'ng tomonga kirsa, sizning golingiz)
+            if(ball.x + ball.r >= goalR - 15 && ball.y > goalTop && ball.y < goalBottom) {
+                console.log("GOAL! Right goal - Player 1 scores");
                 score1++;
                 updateUI();
-                goalFlash = 15;
+                goalFlash = 20;
                 resetPositions();
                 try { navigator.vibrate?.(200); } catch(e) {}
                 return;
@@ -566,15 +529,14 @@
             let dx = ball.x - p2.x;
             let dy = ball.y - p2.y;
             let d = Math.hypot(dx, dy);
-            if(d > 15) {
+            if(d > 20) {
                 let mx = dx / d;
                 let my = dy / d;
                 move(p2, mx, my, delta);
             }
             
-            // AI zarba berish
             let distToBall = Math.hypot(ball.x - p2.x, ball.y - p2.y);
-            if(distToBall < P_RADIUS + B_RADIUS + 20 && (Date.now() - aiLastKick) > 500) {
+            if(distToBall < P_RADIUS + B_RADIUS + 25 && (Date.now() - aiLastKick) > 600) {
                 aiLastKick = Date.now();
                 kickToEnemyGoal(p2, false);
             }
@@ -593,29 +555,30 @@
             joy2Center = { x: rect2.left + rect2.width/2, y: rect2.top + rect2.height/2 };
         }
         
-        // Joy1
-        document.getElementById('joy1').addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            joy1Active = true;
-            joy1TouchId = e.changedTouches[0].identifier;
-            updateJoystickCenters();
-            updateJoy1(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
-        });
-        document.getElementById('joy1').addEventListener('touchmove', (e) => {
-            if(!joy1Active) return;
-            e.preventDefault();
-            for(let i = 0; i < e.touches.length; i++) {
-                if(e.touches[i].identifier === joy1TouchId) {
-                    updateJoy1(e.touches[i].clientX, e.touches[i].clientY);
-                    break;
+        function initJoy1() {
+            document.getElementById('joy1').addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                joy1Active = true;
+                joy1TouchId = e.changedTouches[0].identifier;
+                updateJoystickCenters();
+                updateJoy1(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+            });
+            document.getElementById('joy1').addEventListener('touchmove', (e) => {
+                if(!joy1Active) return;
+                e.preventDefault();
+                for(let i = 0; i < e.touches.length; i++) {
+                    if(e.touches[i].identifier === joy1TouchId) {
+                        updateJoy1(e.touches[i].clientX, e.touches[i].clientY);
+                        break;
+                    }
                 }
-            }
-        });
-        document.getElementById('joy1').addEventListener('touchend', (e) => {
-            joy1Active = false;
-            document.getElementById('thumb1').style.transform = `translate(0px, 0px)`;
-            joy1Vec = { x: 0, y: 0 };
-        });
+            });
+            document.getElementById('joy1').addEventListener('touchend', (e) => {
+                joy1Active = false;
+                document.getElementById('thumb1').style.transform = `translate(0px, 0px)`;
+                joy1Vec = { x: 0, y: 0 };
+            });
+        }
         
         function updateJoy1(cx, cy) {
             let dx = cx - joy1Center.x;
@@ -628,32 +591,32 @@
             document.getElementById('thumb1').style.transform = `translate(${tx}px, ${ty}px)`;
             joy1Vec.x = (d / maxDist) * Math.cos(ang);
             joy1Vec.y = (d / maxDist) * Math.sin(ang);
-            if(d < 0.01) joy1Vec = { x: 0, y: 0 };
         }
         
-        // Joy2
-        document.getElementById('joy2').addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            joy2Active = true;
-            joy2TouchId = e.changedTouches[0].identifier;
-            updateJoystickCenters();
-            updateJoy2(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
-        });
-        document.getElementById('joy2').addEventListener('touchmove', (e) => {
-            if(!joy2Active) return;
-            e.preventDefault();
-            for(let i = 0; i < e.touches.length; i++) {
-                if(e.touches[i].identifier === joy2TouchId) {
-                    updateJoy2(e.touches[i].clientX, e.touches[i].clientY);
-                    break;
+        function initJoy2() {
+            document.getElementById('joy2').addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                joy2Active = true;
+                joy2TouchId = e.changedTouches[0].identifier;
+                updateJoystickCenters();
+                updateJoy2(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+            });
+            document.getElementById('joy2').addEventListener('touchmove', (e) => {
+                if(!joy2Active) return;
+                e.preventDefault();
+                for(let i = 0; i < e.touches.length; i++) {
+                    if(e.touches[i].identifier === joy2TouchId) {
+                        updateJoy2(e.touches[i].clientX, e.touches[i].clientY);
+                        break;
+                    }
                 }
-            }
-        });
-        document.getElementById('joy2').addEventListener('touchend', (e) => {
-            joy2Active = false;
-            document.getElementById('thumb2').style.transform = `translate(0px, 0px)`;
-            joy2Vec = { x: 0, y: 0 };
-        });
+            });
+            document.getElementById('joy2').addEventListener('touchend', (e) => {
+                joy2Active = false;
+                document.getElementById('thumb2').style.transform = `translate(0px, 0px)`;
+                joy2Vec = { x: 0, y: 0 };
+            });
+        }
         
         function updateJoy2(cx, cy) {
             let dx = cx - joy2Center.x;
@@ -666,14 +629,10 @@
             document.getElementById('thumb2').style.transform = `translate(${tx}px, ${ty}px)`;
             joy2Vec.x = (d / maxDist) * Math.cos(ang);
             joy2Vec.y = (d / maxDist) * Math.sin(ang);
-            if(d < 0.01) joy2Vec = { x: 0, y: 0 };
         }
-        
-        window.addEventListener('resize', updateJoystickCenters);
         
         // ========== CHIZISH ==========
         function draw() {
-            // Maydon
             ctx.fillStyle = "#1b7943";
             ctx.fillRect(0, 0, W, H);
             
@@ -682,37 +641,52 @@
             ctx.lineWidth = 3;
             ctx.strokeRect(fieldL, fieldT, fieldR - fieldL, fieldB - fieldT);
             ctx.beginPath();
-            ctx.arc(W/2, H/2, 42, 0, Math.PI * 2);
+            ctx.arc(W/2, H/2, 45, 0, Math.PI * 2);
             ctx.stroke();
             ctx.beginPath();
             ctx.moveTo(W/2, fieldT);
             ctx.lineTo(W/2, fieldB);
             ctx.stroke();
             
-            // Penalty maydonlari
+            // Penalty maydoni
             ctx.strokeStyle = "#ffdd99";
-            ctx.strokeRect(fieldL, H/2 - 50, 55, 100);
-            ctx.strokeRect(fieldR - 55, H/2 - 50, 55, 100);
+            ctx.strokeRect(fieldL, H/2 - 55, 55, 110);
+            ctx.strokeRect(fieldR - 55, H/2 - 55, 55, 110);
             
-            // Darvozalar
+            // Darvozalar (qizil rangda - aniq ko'rinishi uchun)
             ctx.fillStyle = "#c9923a";
-            ctx.fillRect(goalL - 14, goalTop - 6, 18, goalBottom - goalTop + 12);
-            ctx.fillRect(goalR - 4, goalTop - 6, 18, goalBottom - goalTop + 12);
+            // Chap darvoza
+            ctx.fillRect(goalL - 10, goalTop - 5, 18, goalBottom - goalTop + 10);
+            // O'ng darvoza
+            ctx.fillRect(goalR - 8, goalTop - 5, 18, goalBottom - goalTop + 10);
+            
+            // Darvoza chizig'i (aniq chegarani ko'rsatish)
+            ctx.beginPath();
+            ctx.moveTo(goalL, goalTop);
+            ctx.lineTo(goalL, goalBottom);
+            ctx.strokeStyle = "red";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(goalR, goalTop);
+            ctx.lineTo(goalR, goalBottom);
+            ctx.stroke();
             
             // O'yinchilar
-            [p1, p2].forEach(p => {
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.r - 1, 0, Math.PI * 2);
-                ctx.fillStyle = p.color;
-                ctx.fill();
-                ctx.fillStyle = "white";
-                ctx.font = `bold ${Math.floor(p.r/2.5)}px monospace`;
-                ctx.fillText(p === p1 ? "P1" : (gameMode === '2p' ? "P2" : "AI"), p.x - 8, p.y - 12);
-                ctx.fillStyle = "black";
-                ctx.beginPath();
-                ctx.arc(p.x - 5, p.y - 5, 3, 0, Math.PI * 2);
-                ctx.fill();
-            });
+            ctx.beginPath();
+            ctx.arc(p1.x, p1.y, p1.r - 1, 0, Math.PI * 2);
+            ctx.fillStyle = p1.color;
+            ctx.fill();
+            ctx.fillStyle = "white";
+            ctx.font = `bold ${Math.floor(p1.r/2.5)}px monospace`;
+            ctx.fillText("P1", p1.x - 8, p1.y - 12);
+            
+            ctx.beginPath();
+            ctx.arc(p2.x, p2.y, p2.r - 1, 0, Math.PI * 2);
+            ctx.fillStyle = p2.color;
+            ctx.fill();
+            ctx.fillText(gameMode === '2p' ? "P2" : "AI", p2.x - 8, p2.y - 12);
             
             // To'p
             ctx.beginPath();
@@ -736,14 +710,14 @@
             // Power indicator
             if(power1Active && power1Charge > 0) {
                 ctx.fillStyle = "#3b82f6cc";
-                ctx.fillRect(0, 0, W, 32);
+                ctx.fillRect(0, 0, W, 35);
                 ctx.fillStyle = "white";
                 ctx.font = "bold 14px monospace";
-                ctx.fillText(`P1 KUCHLI ZARBA ${Math.floor(power1Charge)}%`, 15, 25);
+                ctx.fillText(`P1 KUCHLI ZARBA ${Math.floor(power1Charge)}%`, 15, 27);
             }
             if(power2Active && power2Charge > 0 && gameMode === '2p') {
                 ctx.fillStyle = "#ef4444cc";
-                ctx.fillRect(0, H - 32, W, 32);
+                ctx.fillRect(0, H - 35, W, 35);
                 ctx.fillStyle = "white";
                 ctx.font = "bold 14px monospace";
                 ctx.fillText(`P2 KUCHLI ZARBA ${Math.floor(power2Charge)}%`, W - 170, H - 12);
@@ -757,16 +731,13 @@
         function update(delta) {
             if(!gameRunning) return;
             
-            // Harakat
             move(p1, joy1Vec.x, joy1Vec.y, delta);
             if(gameMode === '2p') move(p2, joy2Vec.x, joy2Vec.y, delta);
             else aiMove(delta);
             
-            // Kuchli zarba charge
             if(power1Active && power1Charge < 100) power1Charge += 1.8 * delta;
             if(power2Active && power2Charge < 100) power2Charge += 1.8 * delta;
             
-            // To'qnashuvlar
             collidePlayers();
             collideBallWithPlayer(ball, p1);
             collideBallWithPlayer(ball, p2);
@@ -785,11 +756,13 @@
             animId = requestAnimationFrame(gameLoop);
         }
         
-        // ========== O'YINNI BOSHLASH ==========
+        // ========== START ==========
         function start() {
             resize();
             resetGame();
             updateJoystickCenters();
+            initJoy1();
+            initJoy2();
             document.getElementById('menu').style.display = 'none';
             document.getElementById('game').style.display = 'block';
             if(!animId) {
@@ -807,7 +780,7 @@
             document.getElementById('game').style.display = 'none';
         }
         
-        // ========== TUGMALAR ==========
+        // Tugmalar
         document.getElementById('startBtn').onclick = start;
         document.getElementById('backBtn').onclick = backToMenu;
         document.getElementById('restartBtn').onclick = () => { if(gameRunning) resetGame(); };
@@ -815,7 +788,6 @@
         // P1
         document.getElementById('kick1').onclick = () => { if(gameRunning) kickToEnemyGoal(p1, false); };
         document.getElementById('steal1').onclick = () => { if(gameRunning) stealBall(p1, p2); };
-        
         document.getElementById('power1').addEventListener('touchstart', (e) => { e.preventDefault(); power1Active = true; });
         document.getElementById('power1').addEventListener('touchend', (e) => { 
             e.preventDefault(); 
@@ -831,18 +803,12 @@
         // P2
         document.getElementById('kick2').onclick = () => { if(gameRunning && gameMode === '2p') kickToEnemyGoal(p2, false); };
         document.getElementById('steal2').onclick = () => { if(gameRunning && gameMode === '2p') stealBall(p2, p1); };
-        
         document.getElementById('power2').addEventListener('touchstart', (e) => { e.preventDefault(); power2Active = true; });
         document.getElementById('power2').addEventListener('touchend', (e) => { 
             e.preventDefault(); 
             if(power2Active && gameRunning && gameMode === '2p') kickToEnemyGoal(p2, true, power2Charge);
             power2Active = false; power2Charge = 0; 
         });
-        document.getElementById('power2').onmousedown = () => { power2Active = true; };
-        document.getElementById('power2').onmouseup = () => { 
-            if(power2Active && gameRunning && gameMode === '2p') kickToEnemyGoal(p2, true, power2Charge);
-            power2Active = false; power2Charge = 0; 
-        };
         
         // Mode
         document.querySelectorAll('.mode-btn').forEach(btn => {
