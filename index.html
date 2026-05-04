@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>⚽ FUTBOL | GOL TO'G'RI ISHLAYDI</title>
+    <title>⚽ FUTBOL | MOBILE</title>
     <style>
         * {
             margin: 0;
@@ -15,18 +15,18 @@
 
         body {
             background: #0a2f1a;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             font-family: 'Segoe UI', system-ui, sans-serif;
             overflow: hidden;
-            width: 100vw;
-            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
         }
 
+        /* MENU */
         .menu {
-            position: fixed;
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
@@ -38,26 +38,26 @@
             justify-content: center;
             align-items: center;
             flex-direction: column;
-            gap: 20px;
+            gap: 15px;
         }
 
         .menu h1 {
-            font-size: 2.5rem;
+            font-size: 2rem;
             color: #ffd966;
-            text-shadow: 0 5px 0 #7a4a1a;
+            text-shadow: 0 3px 0 #7a4a1a;
         }
 
         .mode-buttons {
             display: flex;
-            gap: 15px;
+            gap: 10px;
         }
 
         .mode-btn {
             background: #2c5a2a;
             border: none;
-            padding: 12px 30px;
-            font-size: 1.1rem;
-            border-radius: 60px;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            border-radius: 50px;
             color: white;
             cursor: pointer;
         }
@@ -69,47 +69,69 @@
         .start-btn {
             background: #2c5a2a;
             border: none;
-            padding: 15px 50px;
-            font-size: 1.3rem;
-            border-radius: 60px;
+            padding: 12px 40px;
+            font-size: 1.1rem;
+            border-radius: 50px;
             color: white;
             cursor: pointer;
             margin-top: 10px;
         }
 
+        /* GAME */
+        #game {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #1b7943;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Score Panel */
         .score-panel {
             position: absolute;
-            top: 15px;
+            top: 10px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 30px;
-            background: #000000aa;
-            padding: 8px 25px;
-            border-radius: 60px;
-            z-index: 10;
+            gap: 20px;
+            background: rgba(0,0,0,0.7);
+            padding: 6px 18px;
+            border-radius: 50px;
+            z-index: 20;
         }
         .score {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: bold;
             font-family: monospace;
         }
         .score-p1 { color: #88bbff; }
         .score-p2 { color: #ff8888; }
+        .timer { color: white; font-family: monospace; font-size: 1.1rem; }
 
+        /* Joysticks */
         .joy-p1, .joy-p2 {
-            position: fixed;
+            position: absolute;
             bottom: 20px;
-            width: 120px;
-            height: 120px;
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
             background: rgba(0,0,0,0.3);
             border: 3px solid;
             touch-action: none;
             z-index: 100;
         }
-        .joy-p1 { left: 20px; border-color: #3b82f6; }
-        .joy-p2 { right: 20px; border-color: #ef4444; }
+        .joy-p1 { left: 15px; border-color: #3b82f6; }
+        .joy-p2 { right: 15px; border-color: #ef4444; }
         
         .joy-base-p1, .joy-base-p2 {
             position: absolute;
@@ -120,35 +142,36 @@
         }
         .joy-thumb-p1, .joy-thumb-p2 {
             position: absolute;
-            width: 50px;
-            height: 50px;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
-            top: 35px;
-            left: 35px;
+            top: 29px;
+            left: 29px;
             transition: transform 0.02s;
         }
         .joy-thumb-p1 { background: #3b82f6; }
         .joy-thumb-p2 { background: #ef4444; }
 
+        /* Buttons */
         .buttons {
-            position: fixed;
+            position: absolute;
             bottom: 20px;
             display: flex;
-            gap: 10px;
+            gap: 8px;
             z-index: 100;
         }
-        .buttons-p1 { left: 160px; }
-        .buttons-p2 { right: 160px; }
+        .buttons-p1 { left: 130px; }
+        .buttons-p2 { right: 130px; }
         
         .btn {
-            width: 65px;
-            height: 65px;
+            width: 55px;
+            height: 55px;
             border-radius: 50%;
             background: rgba(0,0,0,0.85);
             border: 2px solid #ffbb44;
             color: white;
             font-weight: bold;
-            font-size: 0.85rem;
+            font-size: 0.7rem;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -160,26 +183,19 @@
         .steal { background: #8e44ad; }
 
         .restart, .back {
-            position: fixed;
-            top: 15px;
-            background: #2c3e50;
-            padding: 8px 18px;
-            border-radius: 40px;
+            position: absolute;
+            top: 10px;
+            background: rgba(44,62,80,0.9);
+            padding: 6px 14px;
+            border-radius: 30px;
             color: white;
             border: none;
             z-index: 100;
             cursor: pointer;
+            font-size: 0.7rem;
         }
-        .restart { right: 15px; }
-        .back { left: 15px; }
-
-        @media (max-width: 600px) {
-            .joy-p1, .joy-p2 { width: 100px; height: 100px; }
-            .joy-thumb-p1, .joy-thumb-p2 { width: 42px; height: 42px; top: 29px; left: 29px; }
-            .buttons-p1 { left: 140px; }
-            .buttons-p2 { right: 140px; }
-            .btn { width: 55px; height: 55px; font-size: 0.7rem; }
-        }
+        .restart { right: 10px; }
+        .back { left: 10px; }
     </style>
 </head>
 <body>
@@ -193,12 +209,12 @@
     <button class="start-btn" id="startBtn">🎮 START</button>
 </div>
 
-<div id="game" style="display:none; width:100%; height:100%; position:relative;">
-    <canvas id="canvas" style="width:100%; height:100%; display:block;"></canvas>
+<div id="game" style="display:none;">
+    <canvas id="canvas"></canvas>
     
     <div class="score-panel">
         <div class="score score-p1">🔵 <span id="score1">0</span></div>
-        <div class="score" style="color:white;">⏱️ <span id="timer">02:00</span></div>
+        <div class="timer">⏱️ <span id="timer">02:00</span></div>
         <div class="score score-p2">🔴 <span id="score2">0</span></div>
     </div>
 
@@ -241,8 +257,8 @@
         let matchTime = 120;
         let timerInterval = null;
         
-        const P_RADIUS = 26;
-        const B_RADIUS = 11;
+        const P_RADIUS = 24;
+        const B_RADIUS = 10;
         
         let ball = { x: 0, y: 0, vx: 0, vy: 0, r: B_RADIUS };
         let p1 = { x: 0, y: 0, vx: 0, vy: 0, r: P_RADIUS, color: "#3b82f6" };
@@ -256,23 +272,21 @@
         
         let goalFlash = 0;
         
-        // ========== O'LCHAMLAR ==========
         function resize() {
             W = window.innerWidth;
             H = window.innerHeight;
             canvas.width = W;
             canvas.height = H;
             
-            fieldL = 40;
-            fieldR = W - 40;
-            fieldT = 40;
-            fieldB = H - 40;
+            fieldL = 35;
+            fieldR = W - 35;
+            fieldT = 45;
+            fieldB = H - 45;
             
-            // DARVOZA ZONALARI - gol tekshirish uchun
-            goalL = fieldL - 15;
-            goalR = fieldR + 15;
-            goalTop = H/2 - 60;
-            goalBottom = H/2 + 60;
+            goalL = fieldL - 12;
+            goalR = fieldR + 12;
+            goalTop = H/2 - 50;
+            goalBottom = H/2 + 50;
             
             resetPositions();
         }
@@ -334,10 +348,9 @@
             startTimer();
         }
         
-        // ========== HARAKAT ==========
         function move(entity, mx, my, delta=1) {
-            const maxSpeed = 5.0;
-            const acc = 0.65;
+            const maxSpeed = 5.2;
+            const acc = 0.7;
             const dec = 0.96;
             
             if(mx !== 0 || my !== 0) {
@@ -362,7 +375,6 @@
             if(entity.y + entity.r > fieldB) entity.y = fieldB - entity.r;
         }
         
-        // O'yinchilar to'qnashuvi
         function collidePlayers() {
             let dx = p2.x - p1.x;
             let dy = p2.y - p1.y;
@@ -387,7 +399,6 @@
             }
         }
         
-        // To'p va o'yinchi to'qnashuvi
         function collideBallWithPlayer(ball, player) {
             let dx = ball.x - player.x;
             let dy = ball.y - player.y;
@@ -415,31 +426,19 @@
             }
         }
         
-        // ========== ZARBA - RAQIB DARVOZASIGA ==========
         function kickToEnemyGoal(player, isPower=false, charge=0) {
             if(!gameRunning) return;
             
             let distToBall = Math.hypot(ball.x - player.x, ball.y - player.y);
             if(distToBall > player.r + ball.r + 30) return;
             
-            let targetX, targetY;
-            if(player === p1) {
-                // P1 -> O'ng darvoza
-                targetX = goalR;
-                targetY = H/2;
-            } else {
-                // P2 -> Chap darvoza
-                targetX = goalL;
-                targetY = H/2;
-            }
+            let targetX = (player === p1) ? goalR : goalL;
+            let targetY = H/2;
             
             let dx = targetX - ball.x;
             let dy = targetY - ball.y;
             let len = Math.hypot(dx, dy);
-            if(len > 0) {
-                dx /= len;
-                dy /= len;
-            }
+            if(len > 0) { dx /= len; dy /= len; }
             
             let force = isPower ? 9 + (charge / 100) * 8 : 7.5;
             ball.vx = dx * force + player.vx * 0.2;
@@ -448,7 +447,6 @@
             try { navigator.vibrate?.(40); } catch(e) {}
         }
         
-        // O'g'irlash
         function stealBall(stealer, opponent) {
             if(!gameRunning) return;
             
@@ -464,7 +462,6 @@
             }
         }
         
-        // To'p fizikasi
         function updateBall(delta) {
             ball.vx *= Math.pow(0.985, delta);
             ball.vy *= Math.pow(0.985, delta);
@@ -475,53 +472,35 @@
             ball.x += ball.vx * delta;
             ball.y += ball.vy * delta;
             
-            // Devor bilan to'qnashuv
-            if(ball.x - ball.r < fieldL) { 
-                ball.x = fieldL + ball.r; 
-                ball.vx = -ball.vx * 0.85; 
-            }
-            if(ball.x + ball.r > fieldR) { 
-                ball.x = fieldR - ball.r; 
-                ball.vx = -ball.vx * 0.85; 
-            }
-            if(ball.y - ball.r < fieldT) { 
-                ball.y = fieldT + ball.r; 
-                ball.vy = -ball.vy * 0.85; 
-            }
-            if(ball.y + ball.r > fieldB) { 
-                ball.y = fieldB - ball.r; 
-                ball.vy = -ball.vy * 0.85; 
-            }
+            if(ball.x - ball.r < fieldL) { ball.x = fieldL + ball.r; ball.vx = -ball.vx * 0.85; }
+            if(ball.x + ball.r > fieldR) { ball.x = fieldR - ball.r; ball.vx = -ball.vx * 0.85; }
+            if(ball.y - ball.r < fieldT) { ball.y = fieldT + ball.r; ball.vy = -ball.vy * 0.85; }
+            if(ball.y + ball.r > fieldB) { ball.y = fieldB - ball.r; ball.vy = -ball.vy * 0.85; }
         }
         
-        // ========== GOL TEKSHIRISH - TO'G'RILANGAN ==========
         function checkGoal() {
             if(goalFlash > 0) return;
             
-            // CHAP DARVOZA -> P2 GOLI (to'p chap tomonga kirsa, raqib goli)
-            if(ball.x - ball.r <= goalL + 15 && ball.y > goalTop && ball.y < goalBottom) {
-                console.log("GOAL! Left goal - Player 2 scores");
+            // Chap darvoza -> P2 goli
+            if(ball.x - ball.r <= goalL + 10 && ball.y > goalTop && ball.y < goalBottom) {
                 score2++;
                 updateUI();
-                goalFlash = 20;
+                goalFlash = 18;
                 resetPositions();
                 try { navigator.vibrate?.(200); } catch(e) {}
                 return;
             }
-            
-            // O'NG DARVOZA -> P1 GOLI (to'p o'ng tomonga kirsa, sizning golingiz)
-            if(ball.x + ball.r >= goalR - 15 && ball.y > goalTop && ball.y < goalBottom) {
-                console.log("GOAL! Right goal - Player 1 scores");
+            // O'ng darvoza -> P1 goli
+            if(ball.x + ball.r >= goalR - 10 && ball.y > goalTop && ball.y < goalBottom) {
                 score1++;
                 updateUI();
-                goalFlash = 20;
+                goalFlash = 18;
                 resetPositions();
                 try { navigator.vibrate?.(200); } catch(e) {}
                 return;
             }
         }
         
-        // ========== AI ==========
         let aiLastKick = 0;
         function aiMove(delta) {
             if(gameMode !== 'ai') return;
@@ -542,7 +521,7 @@
             }
         }
         
-        // ========== JOYSTICK ==========
+        // Joystick
         let joy1Active = false, joy1TouchId = null;
         let joy2Active = false, joy2TouchId = null;
         let joy1Center = { x: 0, y: 0 };
@@ -555,20 +534,21 @@
             joy2Center = { x: rect2.left + rect2.width/2, y: rect2.top + rect2.height/2 };
         }
         
-        function initJoy1() {
+        function initJoysticks() {
+            // Joy1
             document.getElementById('joy1').addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 joy1Active = true;
                 joy1TouchId = e.changedTouches[0].identifier;
                 updateJoystickCenters();
-                updateJoy1(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+                updateJoy(e.changedTouches[0].clientX, e.changedTouches[0].clientY, '1');
             });
             document.getElementById('joy1').addEventListener('touchmove', (e) => {
                 if(!joy1Active) return;
                 e.preventDefault();
                 for(let i = 0; i < e.touches.length; i++) {
                     if(e.touches[i].identifier === joy1TouchId) {
-                        updateJoy1(e.touches[i].clientX, e.touches[i].clientY);
+                        updateJoy(e.touches[i].clientX, e.touches[i].clientY, '1');
                         break;
                     }
                 }
@@ -578,35 +558,21 @@
                 document.getElementById('thumb1').style.transform = `translate(0px, 0px)`;
                 joy1Vec = { x: 0, y: 0 };
             });
-        }
-        
-        function updateJoy1(cx, cy) {
-            let dx = cx - joy1Center.x;
-            let dy = cy - joy1Center.y;
-            let maxDist = 45;
-            let d = Math.min(maxDist, Math.hypot(dx, dy));
-            let ang = Math.atan2(dy, dx);
-            let tx = Math.cos(ang) * d;
-            let ty = Math.sin(ang) * d;
-            document.getElementById('thumb1').style.transform = `translate(${tx}px, ${ty}px)`;
-            joy1Vec.x = (d / maxDist) * Math.cos(ang);
-            joy1Vec.y = (d / maxDist) * Math.sin(ang);
-        }
-        
-        function initJoy2() {
+            
+            // Joy2
             document.getElementById('joy2').addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 joy2Active = true;
                 joy2TouchId = e.changedTouches[0].identifier;
                 updateJoystickCenters();
-                updateJoy2(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+                updateJoy(e.changedTouches[0].clientX, e.changedTouches[0].clientY, '2');
             });
             document.getElementById('joy2').addEventListener('touchmove', (e) => {
                 if(!joy2Active) return;
                 e.preventDefault();
                 for(let i = 0; i < e.touches.length; i++) {
                     if(e.touches[i].identifier === joy2TouchId) {
-                        updateJoy2(e.touches[i].clientX, e.touches[i].clientY);
+                        updateJoy(e.touches[i].clientX, e.touches[i].clientY, '2');
                         break;
                     }
                 }
@@ -618,60 +584,50 @@
             });
         }
         
-        function updateJoy2(cx, cy) {
-            let dx = cx - joy2Center.x;
-            let dy = cy - joy2Center.y;
-            let maxDist = 45;
+        function updateJoy(cx, cy, player) {
+            let center = player === '1' ? joy1Center : joy2Center;
+            let maxDist = 40;
+            let dx = cx - center.x;
+            let dy = cy - center.y;
             let d = Math.min(maxDist, Math.hypot(dx, dy));
             let ang = Math.atan2(dy, dx);
             let tx = Math.cos(ang) * d;
             let ty = Math.sin(ang) * d;
-            document.getElementById('thumb2').style.transform = `translate(${tx}px, ${ty}px)`;
-            joy2Vec.x = (d / maxDist) * Math.cos(ang);
-            joy2Vec.y = (d / maxDist) * Math.sin(ang);
+            
+            if(player === '1') {
+                document.getElementById('thumb1').style.transform = `translate(${tx}px, ${ty}px)`;
+                joy1Vec.x = (d / maxDist) * Math.cos(ang);
+                joy1Vec.y = (d / maxDist) * Math.sin(ang);
+            } else {
+                document.getElementById('thumb2').style.transform = `translate(${tx}px, ${ty}px)`;
+                joy2Vec.x = (d / maxDist) * Math.cos(ang);
+                joy2Vec.y = (d / maxDist) * Math.sin(ang);
+            }
         }
         
-        // ========== CHIZISH ==========
+        // Draw
         function draw() {
             ctx.fillStyle = "#1b7943";
             ctx.fillRect(0, 0, W, H);
             
-            // Chiziqlar
             ctx.strokeStyle = "#fff3cf";
-            ctx.lineWidth = 3;
+            ctx.lineWidth = 2;
             ctx.strokeRect(fieldL, fieldT, fieldR - fieldL, fieldB - fieldT);
             ctx.beginPath();
-            ctx.arc(W/2, H/2, 45, 0, Math.PI * 2);
+            ctx.arc(W/2, H/2, 40, 0, Math.PI * 2);
             ctx.stroke();
             ctx.beginPath();
             ctx.moveTo(W/2, fieldT);
             ctx.lineTo(W/2, fieldB);
             ctx.stroke();
             
-            // Penalty maydoni
             ctx.strokeStyle = "#ffdd99";
-            ctx.strokeRect(fieldL, H/2 - 55, 55, 110);
-            ctx.strokeRect(fieldR - 55, H/2 - 55, 55, 110);
+            ctx.strokeRect(fieldL, H/2 - 50, 50, 100);
+            ctx.strokeRect(fieldR - 50, H/2 - 50, 50, 100);
             
-            // Darvozalar (qizil rangda - aniq ko'rinishi uchun)
             ctx.fillStyle = "#c9923a";
-            // Chap darvoza
-            ctx.fillRect(goalL - 10, goalTop - 5, 18, goalBottom - goalTop + 10);
-            // O'ng darvoza
-            ctx.fillRect(goalR - 8, goalTop - 5, 18, goalBottom - goalTop + 10);
-            
-            // Darvoza chizig'i (aniq chegarani ko'rsatish)
-            ctx.beginPath();
-            ctx.moveTo(goalL, goalTop);
-            ctx.lineTo(goalL, goalBottom);
-            ctx.strokeStyle = "red";
-            ctx.lineWidth = 3;
-            ctx.stroke();
-            
-            ctx.beginPath();
-            ctx.moveTo(goalR, goalTop);
-            ctx.lineTo(goalR, goalBottom);
-            ctx.stroke();
+            ctx.fillRect(goalL - 8, goalTop - 4, 14, goalBottom - goalTop + 8);
+            ctx.fillRect(goalR - 6, goalTop - 4, 14, goalBottom - goalTop + 8);
             
             // O'yinchilar
             ctx.beginPath();
@@ -680,13 +636,13 @@
             ctx.fill();
             ctx.fillStyle = "white";
             ctx.font = `bold ${Math.floor(p1.r/2.5)}px monospace`;
-            ctx.fillText("P1", p1.x - 8, p1.y - 12);
+            ctx.fillText("P1", p1.x - 7, p1.y - 10);
             
             ctx.beginPath();
             ctx.arc(p2.x, p2.y, p2.r - 1, 0, Math.PI * 2);
             ctx.fillStyle = p2.color;
             ctx.fill();
-            ctx.fillText(gameMode === '2p' ? "P2" : "AI", p2.x - 8, p2.y - 12);
+            ctx.fillText(gameMode === '2p' ? "P2" : "AI", p2.x - 7, p2.y - 10);
             
             // To'p
             ctx.beginPath();
@@ -695,40 +651,38 @@
             ctx.fill();
             ctx.fillStyle = "#2c2c2c";
             ctx.beginPath();
-            ctx.moveTo(ball.x - 5, ball.y - 2);
-            ctx.lineTo(ball.x + 5, ball.y - 2);
-            ctx.lineTo(ball.x, ball.y + 6);
+            ctx.moveTo(ball.x - 4, ball.y - 2);
+            ctx.lineTo(ball.x + 4, ball.y - 2);
+            ctx.lineTo(ball.x, ball.y + 5);
             ctx.fill();
             
-            // Gol flash
             if(goalFlash > 0) {
                 ctx.fillStyle = `rgba(255, 235, 120, ${goalFlash / 15})`;
                 ctx.fillRect(0, 0, W, H);
                 goalFlash--;
             }
             
-            // Power indicator
+            // Power charge
             if(power1Active && power1Charge > 0) {
                 ctx.fillStyle = "#3b82f6cc";
-                ctx.fillRect(0, 0, W, 35);
+                ctx.fillRect(0, 0, W, 28);
                 ctx.fillStyle = "white";
-                ctx.font = "bold 14px monospace";
-                ctx.fillText(`P1 KUCHLI ZARBA ${Math.floor(power1Charge)}%`, 15, 27);
+                ctx.font = "bold 12px monospace";
+                ctx.fillText(`P1 KUCHLI ${Math.floor(power1Charge)}%`, 10, 20);
             }
             if(power2Active && power2Charge > 0 && gameMode === '2p') {
                 ctx.fillStyle = "#ef4444cc";
-                ctx.fillRect(0, H - 35, W, 35);
+                ctx.fillRect(0, H - 28, W, 28);
                 ctx.fillStyle = "white";
-                ctx.font = "bold 14px monospace";
-                ctx.fillText(`P2 KUCHLI ZARBA ${Math.floor(power2Charge)}%`, W - 170, H - 12);
+                ctx.font = "bold 12px monospace";
+                ctx.fillText(`P2 KUCHLI ${Math.floor(power2Charge)}%`, W - 120, H - 10);
             }
         }
         
-        // ========== O'YIN LOOPI ==========
         let lastTime = 0;
         let animId = null;
         
-        function update(delta) {
+        function updateGame(delta) {
             if(!gameRunning) return;
             
             move(p1, joy1Vec.x, joy1Vec.y, delta);
@@ -750,19 +704,17 @@
             if(delta < 0.3) delta = 0.8;
             lastTime = now;
             
-            update(delta);
+            updateGame(delta);
             draw();
             
             animId = requestAnimationFrame(gameLoop);
         }
         
-        // ========== START ==========
         function start() {
             resize();
             resetGame();
             updateJoystickCenters();
-            initJoy1();
-            initJoy2();
+            initJoysticks();
             document.getElementById('menu').style.display = 'none';
             document.getElementById('game').style.display = 'block';
             if(!animId) {
@@ -780,12 +732,11 @@
             document.getElementById('game').style.display = 'none';
         }
         
-        // Tugmalar
+        // Events
         document.getElementById('startBtn').onclick = start;
         document.getElementById('backBtn').onclick = backToMenu;
         document.getElementById('restartBtn').onclick = () => { if(gameRunning) resetGame(); };
         
-        // P1
         document.getElementById('kick1').onclick = () => { if(gameRunning) kickToEnemyGoal(p1, false); };
         document.getElementById('steal1').onclick = () => { if(gameRunning) stealBall(p1, p2); };
         document.getElementById('power1').addEventListener('touchstart', (e) => { e.preventDefault(); power1Active = true; });
@@ -794,13 +745,7 @@
             if(power1Active && gameRunning) kickToEnemyGoal(p1, true, power1Charge);
             power1Active = false; power1Charge = 0; 
         });
-        document.getElementById('power1').onmousedown = () => { power1Active = true; };
-        document.getElementById('power1').onmouseup = () => { 
-            if(power1Active && gameRunning) kickToEnemyGoal(p1, true, power1Charge);
-            power1Active = false; power1Charge = 0; 
-        };
         
-        // P2
         document.getElementById('kick2').onclick = () => { if(gameRunning && gameMode === '2p') kickToEnemyGoal(p2, false); };
         document.getElementById('steal2').onclick = () => { if(gameRunning && gameMode === '2p') stealBall(p2, p1); };
         document.getElementById('power2').addEventListener('touchstart', (e) => { e.preventDefault(); power2Active = true; });
@@ -810,7 +755,6 @@
             power2Active = false; power2Charge = 0; 
         });
         
-        // Mode
         document.querySelectorAll('.mode-btn').forEach(btn => {
             btn.onclick = () => {
                 document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
@@ -818,7 +762,13 @@
                 gameMode = btn.dataset.mode;
             };
         });
+        
+        window.addEventListener('resize', () => {
+            resize();
+            updateJoystickCenters();
+        });
     })();
 </script>
 </body>
-</html>
+</html>azamat kot
+
