@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>⚽ FUTBOL | REALISTIK FIZIKA</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #0a2f1a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(15px);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .menu h1 {
+            font-size: 2.5rem;
+            color: #ffd966;
+            text-shadow: 0 5px 0 #7a4a1a;
+        }
+
+        .mode-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .mode-btn {
+            background: #2c5a2a;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 60px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .mode-btn.active {
+            background: #e67e22;
+        }
+
+        .start-btn {
+            background: #2c5a2a;
+            border: none;
+            padding: 15px 50px;
+            font-size: 1.3rem;
+            border-radius: 60px;
+            color: white;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .score-panel {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 30px;
+            background: #000000aa;
+            padding: 8px 25px;
+            border-radius: 60px;
+            z-index: 10;
+        }
+        .score {
+            font-size: 1.5rem;
+            font-weight: bold;
+            font-family: monospace;
+        }
+        .score-p1 { color: #88bbff; }
+        .score-p2 { color: #ff8888; }
+
+        /* Joystick P1 - Chap */
+        .joy-p1 {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: rgba(59,130,246,0.3);
+            border: 3px solid #3b82f6;
+            touch-action: none;
+            z-index: 100;
+        }
+        .joy-base-p1 {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.4);
+        }
+        .joy-thumb-p1 {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: #3b82f6;
+            border-radius: 50%;
+            top: 35px;
+            left: 35px;
+            transition: transform 0.02s;
+        }
+
+        /* Joystick P2 - O'ng */
+        .joy-p2 {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: rgba(239,68,68,0.3);
+            border: 3px solid #ef4444;
+            touch-action: none;
+            z-index: 100;
+        }
+        .joy-base-p2 {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.4);
+        }
+        .joy-thumb-p2 {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: #ef4444;
+            border-radius: 50%;
+            top: 35px;
+            left: 35px;
+            transition: transform 0.02s;
+        }
+
+        /* Tugmalar */
+        .buttons {
+            position: fixed;
+            bottom: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+        .buttons-p1 { left: 160px; }
+        .buttons-p2 { right: 160px; }
+        
+        .btn {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.85);
+            border: 2px solid #ffbb44;
+            color: white;
+            font-weight: bold;
+            font-size: 0.85rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .btn:active { transform: scale(0.95); }
+        .power { background: #c0392b; }
+        .steal { background: #8e44ad; }
+
+        .restart, .back {
+            position: fixed;
+            top: 15px;
+            background: #2c3e50;
+            padding: 8px 18px;
+            border-radius: 40px;
+            color: white;
+            border: none;
+            z-index: 100;
+            cursor: pointer;
+        }
+        .restart { right: 15px; }
+        .back { left: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="menu" id="menu">
+    <h1>⚽ FUTBOL</h1>
+    <div class="mode-buttons">
+        <button class="mode-btn active" data-mode="2p">👥 2 PLAYER</button>
+        <button class="mode-btn" data-mode="ai">🤖 VS AI</button>
+    </div>
+    <button class="start-btn" id="startBtn">🎮 START</button>
+</div>
+
+<div id="game" style="display:none; width:100%; height:100%; position:relative;">
+    <canvas id="canvas" style="width:100%; height:100%; display:block; background:#1b7943;"></canvas>
+    
+    <div class="score-panel">
+        <div class="score score-p1">🔵 <span id="score1">0</span></div>
+        <div class="score" style="color:white;">⏱️ <span id="timer">02:00</span></div>
+        <div class="score score-p2">🔴 <span id="score2">0</span></div>
+    </div>
+
+    <div class="joy-p1" id="joy1">
+        <div class="joy-base-p1"></div>
+        <div class="joy-thumb-p1" id="thumb1"></div>
+    </div>
+    <div class="joy-p2" id="joy2">
+        <div class="joy-base-p2"></div>
+        <div class="joy-thumb-p2" id="thumb2"></div>
+    </div>
+
+    <div class="buttons buttons-p1">
+        <button class="btn" id="kick1">⚡ URISH</button>
+        <button class="btn power" id="power1">💥 KUCHLI</button>
+        <button class="btn steal" id="steal1">👐 OLISH</button>
+    </div>
+    <div class="buttons buttons-p2">
+        <button class="btn" id="kick2">⚡ URISH</button>
+        <button class="btn power" id="power2">💥 KUCHLI</button>
+        <button class="btn steal" id="steal2">👐 OLISH</button>
+    </div>
+
+    <button class="restart" id="restartBtn">🔄 QAYTA</button>
+    <button class="back" id="backBtn">🏠 MENU</button>
+</div>
+
+<script>
+    (function(){
+        // ========== O'LCHAMLAR ==========
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let W, H;
+        let fieldL, fieldR, fieldT, fieldB;
+        let goalL, goalR, goalTop, goalBottom;
+        
+        // ========== O'YIN HOLATI ==========
+        let gameRunning = false;
+        let gameMode = '2p';
+        let score1 = 0, score2 = 0;
+        let matchTime = 120;
+        let timerInterval = null;
+        
+        // ========== FIZIKA ==========
+        const P_RADIUS = 26;
+        const B_RADIUS = 11;
+        
+        // To'p - YOPISHMAYDI, faqat tepilganda uchadi
+        let ball = {
+            x: 0, y: 0, vx: 0, vy: 0,
+            r: B_RADIUS
+        };
+        
+        // O'yinchilar
+        let p1 = { x: 0, y: 0, vx: 0, vy: 0, r: P_RADIUS, color: "#3b82f6" };
+        let p2 = { x: 0, y: 0, vx: 0, vy: 0, r: P_RADIUS, color: "#ef4444" };
+        
+        // Joystick vektorlari
+        let joy1Vec = { x: 0, y: 0 };
+        let joy2Vec = { x: 0, y: 0 };
+        
+        // Kuchli zarba
+        let power1Active = false, power1Charge = 0;
+        let power2Active = false, power2Charge = 0;
+        
+        // Effekt
+        let goalFlash = 0;
+        let lastKickTime1 = 0;
+        let lastKickTime2 = 0;
+        
+        // ========== O'LCHAMLARNI HISOBLASH ==========
+        function resize() {
+            W = window.innerWidth;
+            H = window.innerHeight;
+            canvas.width = W;
+            canvas.height = H;
+            
+            fieldL = Math.max(30, W * 0.04);
+            fieldR = W - fieldL;
+            fieldT = Math.max(30, H * 0.05);
+            fieldB = H - fieldT;
+            goalL = fieldL - 12;
+            goalR = fieldR + 12;
+            goalTop = H/2 - 55;
+            goalBottom = H/2 + 55;
+            
+            resetPositions();
+        }
+        
+        window.addEventListener('resize', () => { resize(); });
+        
+        function resetPositions() {
+            ball.x = W/2;
+            ball.y = H/2;
+            ball.vx = 0;
+            ball.vy = 0;
+            
+            p1.x = Math.max(fieldL + P_RADIUS, W * 0.18);
+            p1.y = H/2;
+            p1.vx = 0;
+            p1.vy = 0;
+            
+            p2.x = Math.min(fieldR - P_RADIUS, W * 0.82);
+            p2.y = H/2;
+            p2.vx = 0;
+            p2.vy = 0;
+        }
+        
+        // ========== UI ==========
+        function updateUI() {
+            document.getElementById('score1').innerHTML = score1;
+            document.getElementById('score2').innerHTML = score2;
+        }
+        
+        function updateTimer() {
+            let m = Math.floor(matchTime / 60);
+            let s = matchTime % 60;
+            document.getElementById('timer').innerHTML = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            if(matchTime <= 0 && gameRunning) {
+                gameRunning = false;
+                if(timerInterval) clearInterval(timerInterval);
+            }
+        }
+        
+        function startTimer() {
+            if(timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if(gameRunning && matchTime > 0) {
+                    matchTime--;
+                    updateTimer();
+                    if(matchTime === 0) gameRunning = false;
+                }
+            }, 1000);
+        }
+        
+        function resetGame() {
+            if(timerInterval) clearInterval(timerInterval);
+            score1 = 0;
+            score2 = 0;
+            matchTime = 120;
+            updateUI();
+            updateTimer();
+            resetPositions();
+            gameRunning = true;
+            startTimer();
+        }
+        
+        // ========== HARAKAT ==========
+        function move(entity, mx, my, delta=1) {
+            const maxSpeed = 4.8;
+            const acc = 0.6;
+            const dec = 0.96;
+            
+            if(mx !== 0 || my !== 0) {
+                entity.vx += mx * acc * delta;
+                entity.vy += my * acc * delta;
+            }
+            entity.vx *= Math.pow(dec, delta);
+            entity.vy *= Math.pow(dec, delta);
+            
+            let sp = Math.hypot(entity.vx, entity.vy);
+            if(sp > maxSpeed) {
+                entity.vx = entity.vx / sp * maxSpeed;
+                entity.vy = entity.vy / sp * maxSpeed;
+            }
+            
+            entity.x += entity.vx * delta;
+            entity.y += entity.vy * delta;
+            
+            let r = entity.r;
+            if(entity.x - r < fieldL) entity.x = fieldL + r;
+            if(entity.x + r > fieldR) entity.x = fieldR - r;
+            if(entity.y - r < fieldT) entity.y = fieldT + r;
+            if(entity.y + r > fieldB) entity.y = fieldB - r;
+        }
+        
+        // ========== O'YINCHILAR TO'QNASHUVI ==========
+        function collidePlayers() {
+            let dx = p2.x - p1.x;
+            let dy = p2.y - p1.y;
+            let d = Math.hypot(dx, dy);
+            let minD = p1.r + p2.r;
+            
+            if(d < minD) {
+                let angle = Math.atan2(dy, dx);
+                let overlap = minD - d;
+                p1.x -= Math.cos(angle) * overlap * 0.5;
+                p1.y -= Math.sin(angle) * overlap * 0.5;
+                p2.x += Math.cos(angle) * overlap * 0.5;
+                p2.y += Math.sin(angle) * overlap * 0.5;
+                
+                // Momentum almashinuvi
+                let nx = dx / d;
+                let ny = dy / d;
+                let p = 2 * (p1.vx * nx + p1.vy * ny - p2.vx * nx - p2.vy * ny) / 2;
+                p1.vx -= p * nx;
+                p1.vy -= p * ny;
+                p2.vx += p * nx;
+                p2.vy += p * ny;
+            }
+        }
+        
+        // ========== TO'P VA O'YINCHI TO'QNASHUVI ==========
+        function collideBallWithPlayer(ball, player) {
+            let dx = ball.x - player.x;
+            let dy = ball.y - player.y;
+            let d = Math.hypot(dx, dy);
+            let minD = ball.r + player.r;
+            
+            if(d < minD) {
+                // To'pni itarib chiqarish
+                let angle = Math.atan2(dy, dx);
+                let overlap = minD - d;
+                ball.x += Math.cos(angle) * overlap;
+                ball.y += Math.sin(angle) * overlap;
+                
+                // To'pga zarba berish (o'yinchi tezligiga qarab)
+                let relVx = ball.vx - player.vx;
+                let relVy = ball.vy - player.vy;
+                let velAlong = relVx * Math.cos(angle) + relVy * Math.sin(angle);
+                
+                if(velAlong < 0) {
+                    let restitution = 0.75;
+                    let impulse = (1 + restitution) * velAlong;
+                    ball.vx -= impulse * Math.cos(angle) * 0.9;
+                    ball.vy -= impulse * Math.sin(angle) * 0.9;
+                    
+                    // O'yinchi harakatidan to'pga ta'sir
+                    ball.vx += player.vx * 0.3;
+                    ball.vy += player.vy * 0.3;
+                }
+            }
+        }
+        
+        // ========== ZARBA - RAQIB DARVOZASIGA (YOPISHMAYDI) ==========
+        function kickToEnemyGoal(player, isPower=false, charge=0) {
+            if(!gameRunning) return;
+            
+            // To'p o'yinchiga yaqinmi?
+            let distToBall = Math.hypot(ball.x - player.x, ball.y - player.y);
+            if(distToBall > player.r + ball.r + 25) return;
+            
+            // RAQIB DARVOZASIGA YO'NALISH
+            let angleToGoal;
+            if(player === p1) {
+                // P1 -> o'ng darvoza (P2 darvozasi)
+                angleToGoal = Math.atan2(goalTop + 55 - ball.y, goalR - ball.x);
+            } else {
+                // P2 -> chap darvoza (P1 darvozasi)
+                angleToGoal = Math.atan2(goalTop + 55 - ball.y, goalL - ball.x);
+            }
+            
+            // Zarba kuchi
+            let force = isPower ? 9 + (charge / 100) * 8 : 7.5;
+            
+            ball.vx = Math.cos(angleToGoal) * force + player.vx * 0.2;
+            ball.vy = Math.sin(angleToGoal) * force + player.vy * 0.2;
+            
+            // Ovoz effekti
+            try { navigator.vibrate?.(40); } catch(e) {}
+        }
+        
+        // ========== O'G'IRLASH ==========
+        function stealBall(stealer, opponent) {
+            if(!gameRunning) return;
+            
+            let distToBall = Math.hypot(ball.x - stealer.x, ball.y - stealer.y);
+            let distOppToBall = Math.hypot(ball.x - opponent.x, ball.y - opponent.y);
+            
+            // Agar to'p raqibga yaqin bo'lsa va o'g'irlovchi ham yaqin bo'lsa
+            if(distOppToBall < P_RADIUS + B_RADIUS + 15 && distToBall < P_RADIUS + B_RADIUS + 20) {
+                // To'pni itarib yuborish (o'g'irlash)
+                let angle = Math.atan2(stealer.y - opponent.y, stealer.x - opponent.x);
+                let force = 6;
+                ball.vx = Math.cos(angle) * force + stealer.vx * 0.3;
+                ball.vy = Math.sin(angle) * force + stealer.vy * 0.3;
+                
+                try { navigator.vibrate?.(30); } catch(e) {}
+            }
+        }
+        
+        // ========== TO'P FIZIKASI ==========
+        function updateBall(delta) {
+            ball.vx *= Math.pow(0.985, delta);
+            ball.vy *= Math.pow(0.985, delta);
+            
+            if(Math.abs(ball.vx) < 0.05) ball.vx = 0;
+            if(Math.abs(ball.vy) < 0.05) ball.vy = 0;
+            
+            ball.x += ball.vx * delta;
+            ball.y += ball.vy * delta;
+            
+            // Devor bilan to'qnashuv
+            let r = ball.r;
+            if(ball.x - r < fieldL) { 
+                ball.x = fieldL + r; 
+                ball.vx = -ball.vx * 0.85; 
+            }
+            if(ball.x + r > fieldR) { 
+                ball.x = fieldR - r; 
+                ball.vx = -ball.vx * 0.85; 
+            }
+            if(ball.y - r < fieldT) { 
+                ball.y = fieldT + r; 
+                ball.vy = -ball.vy * 0.85; 
+            }
+            if(ball.y + r > fieldB) { 
+                ball.y = fieldB - r; 
+                ball.vy = -ball.vy * 0.85; 
+            }
+        }
+        
+        // ========== GOL TEKSHIRISH ==========
+        function checkGoal() {
+            if(goalFlash > 0) return;
+            
+            // Chap darvoza -> P2 goli
+            if(ball.x - ball.r <= goalL + 10 && ball.y > goalTop && ball.y < goalBottom) {
+                score2++;
+                updateUI();
+                goalFlash = 15;
+                resetPositions();
+                try { navigator.vibrate?.(200); } catch(e) {}
+                return;
+            }
+            // O'ng darvoza -> P1 goli
+            if(ball.x + ball.r >= goalR - 10 && ball.y > goalTop && ball.y < goalBottom) {
+                score1++;
+                updateUI();
+                goalFlash = 15;
+                resetPositions();
+                try { navigator.vibrate?.(200); } catch(e) {}
+                return;
+            }
+        }
+        
+        // ========== AI ==========
+        let aiLastKick = 0;
+        function aiMove(delta) {
+            if(gameMode !== 'ai') return;
+            
+            let dx = ball.x - p2.x;
+            let dy = ball.y - p2.y;
+            let d = Math.hypot(dx, dy);
+            if(d > 15) {
+                let mx = dx / d;
+                let my = dy / d;
+                move(p2, mx, my, delta);
+            }
+            
+            // AI zarba berish
+            let distToBall = Math.hypot(ball.x - p2.x, ball.y - p2.y);
+            if(distToBall < P_RADIUS + B_RADIUS + 20 && (Date.now() - aiLastKick) > 500) {
+                aiLastKick = Date.now();
+                kickToEnemyGoal(p2, false);
+            }
+        }
+        
+        // ========== JOYSTICK ==========
+        let joy1Active = false, joy1TouchId = null;
+        let joy2Active = false, joy2TouchId = null;
+        let joy1Center = { x: 0, y: 0 };
+        let joy2Center = { x: 0, y: 0 };
+        
+        function updateJoystickCenters() {
+            let rect1 = document.getElementById('joy1').getBoundingClientRect();
+            joy1Center = { x: rect1.left + rect1.width/2, y: rect1.top + rect1.height/2 };
+            let rect2 = document.getElementById('joy2').getBoundingClientRect();
+            joy2Center = { x: rect2.left + rect2.width/2, y: rect2.top + rect2.height/2 };
+        }
+        
+        // Joy1
+        document.getElementById('joy1').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            joy1Active = true;
+            joy1TouchId = e.changedTouches[0].identifier;
+            updateJoystickCenters();
+            updateJoy1(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+        });
+        document.getElementById('joy1').addEventListener('touchmove', (e) => {
+            if(!joy1Active) return;
+            e.preventDefault();
+            for(let i = 0; i < e.touches.length; i++) {
+                if(e.touches[i].identifier === joy1TouchId) {
+                    updateJoy1(e.touches[i].clientX, e.touches[i].clientY);
+                    break;
+                }
+            }
+        });
+        document.getElementById('joy1').addEventListener('touchend', (e) => {
+            joy1Active = false;
+            document.getElementById('thumb1').style.transform = `translate(0px, 0px)`;
+            joy1Vec = { x: 0, y: 0 };
+        });
+        
+        function updateJoy1(cx, cy) {
+            let dx = cx - joy1Center.x;
+            let dy = cy - joy1Center.y;
+            let maxDist = 45;
+            let d = Math.min(maxDist, Math.hypot(dx, dy));
+            let ang = Math.atan2(dy, dx);
+            let tx = Math.cos(ang) * d;
+            let ty = Math.sin(ang) * d;
+            document.getElementById('thumb1').style.transform = `translate(${tx}px, ${ty}px)`;
+            joy1Vec.x = (d / maxDist) * Math.cos(ang);
+            joy1Vec.y = (d / maxDist) * Math.sin(ang);
+            if(d < 0.01) joy1Vec = { x: 0, y: 0 };
+        }
+        
+        // Joy2
+        document.getElementById('joy2').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            joy2Active = true;
+            joy2TouchId = e.changedTouches[0].identifier;
+            updateJoystickCenters();
+            updateJoy2(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+        });
+        document.getElementById('joy2').addEventListener('touchmove', (e) => {
+            if(!joy2Active) return;
+            e.preventDefault();
+            for(let i = 0; i < e.touches.length; i++) {
+                if(e.touches[i].identifier === joy2TouchId) {
+                    updateJoy2(e.touches[i].clientX, e.touches[i].clientY);
+                    break;
+                }
+            }
+        });
+        document.getElementById('joy2').addEventListener('touchend', (e) => {
+            joy2Active = false;
+            document.getElementById('thumb2').style.transform = `translate(0px, 0px)`;
+            joy2Vec = { x: 0, y: 0 };
+        });
+        
+        function updateJoy2(cx, cy) {
+            let dx = cx - joy2Center.x;
+            let dy = cy - joy2Center.y;
+            let maxDist = 45;
+            let d = Math.min(maxDist, Math.hypot(dx, dy));
+            let ang = Math.atan2(dy, dx);
+            let tx = Math.cos(ang) * d;
+            let ty = Math.sin(ang) * d;
+            document.getElementById('thumb2').style.transform = `translate(${tx}px, ${ty}px)`;
+            joy2Vec.x = (d / maxDist) * Math.cos(ang);
+            joy2Vec.y = (d / maxDist) * Math.sin(ang);
+            if(d < 0.01) joy2Vec = { x: 0, y: 0 };
+        }
+        
+        window.addEventListener('resize', updateJoystickCenters);
+        
+        // ========== CHIZISH ==========
+        function draw() {
+            // Maydon
+            ctx.fillStyle = "#1b7943";
+            ctx.fillRect(0, 0, W, H);
+            
+            // Chiziqlar
+            ctx.strokeStyle = "#fff3cf";
+            ctx.lineWidth = 3;
+            ctx.strokeRect(fieldL, fieldT, fieldR - fieldL, fieldB - fieldT);
+            ctx.beginPath();
+            ctx.arc(W/2, H/2, 42, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(W/2, fieldT);
+            ctx.lineTo(W/2, fieldB);
+            ctx.stroke();
+            
+            // Penalty maydonlari
+            ctx.strokeStyle = "#ffdd99";
+            ctx.strokeRect(fieldL, H/2 - 50, 55, 100);
+            ctx.strokeRect(fieldR - 55, H/2 - 50, 55, 100);
+            
+            // Darvozalar
+            ctx.fillStyle = "#c9923a";
+            ctx.fillRect(goalL - 14, goalTop - 6, 18, goalBottom - goalTop + 12);
+            ctx.fillRect(goalR - 4, goalTop - 6, 18, goalBottom - goalTop + 12);
+            
+            // O'yinchilar
+            [p1, p2].forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r - 1, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.fill();
+                ctx.fillStyle = "white";
+                ctx.font = `bold ${Math.floor(p.r/2.5)}px monospace`;
+                ctx.fillText(p === p1 ? "P1" : (gameMode === '2p' ? "P2" : "AI"), p.x - 8, p.y - 12);
+                ctx.fillStyle = "black";
+                ctx.beginPath();
+                ctx.arc(p.x - 5, p.y - 5, 3, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            // To'p
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+            ctx.fillStyle = "#ffefb0";
+            ctx.fill();
+            ctx.fillStyle = "#2c2c2c";
+            ctx.beginPath();
+            ctx.moveTo(ball.x - 5, ball.y - 2);
+            ctx.lineTo(ball.x + 5, ball.y - 2);
+            ctx.lineTo(ball.x, ball.y + 6);
+            ctx.fill();
+            
+            // Gol flash
+            if(goalFlash > 0) {
+                ctx.fillStyle = `rgba(255, 235, 120, ${goalFlash / 15})`;
+                ctx.fillRect(0, 0, W, H);
+                goalFlash--;
+            }
+            
+            // Power indicator
+            if(power1Active && power1Charge > 0) {
+                ctx.fillStyle = "#3b82f6cc";
+                ctx.fillRect(0, 0, W, 32);
+                ctx.fillStyle = "white";
+                ctx.font = "bold 14px monospace";
+                ctx.fillText(`P1 KUCHLI ZARBA ${Math.floor(power1Charge)}%`, 15, 25);
+            }
+            if(power2Active && power2Charge > 0 && gameMode === '2p') {
+                ctx.fillStyle = "#ef4444cc";
+                ctx.fillRect(0, H - 32, W, 32);
+                ctx.fillStyle = "white";
+                ctx.font = "bold 14px monospace";
+                ctx.fillText(`P2 KUCHLI ZARBA ${Math.floor(power2Charge)}%`, W - 170, H - 12);
+            }
+        }
+        
+        // ========== O'YIN LOOPI ==========
+        let lastTime = 0;
+        let animId = null;
+        
+        function update(delta) {
+            if(!gameRunning) return;
+            
+            // Harakat
+            move(p1, joy1Vec.x, joy1Vec.y, delta);
+            if(gameMode === '2p') move(p2, joy2Vec.x, joy2Vec.y, delta);
+            else aiMove(delta);
+            
+            // Kuchli zarba charge
+            if(power1Active && power1Charge < 100) power1Charge += 1.8 * delta;
+            if(power2Active && power2Charge < 100) power2Charge += 1.8 * delta;
+            
+            // To'qnashuvlar
+            collidePlayers();
+            collideBallWithPlayer(ball, p1);
+            collideBallWithPlayer(ball, p2);
+            updateBall(delta);
+            checkGoal();
+        }
+        
+        function gameLoop(now) {
+            let delta = Math.min(1.5, (now - lastTime) / 16.67);
+            if(delta < 0.3) delta = 0.8;
+            lastTime = now;
+            
+            update(delta);
+            draw();
+            
+            animId = requestAnimationFrame(gameLoop);
+        }
+        
+        // ========== O'YINNI BOSHLASH ==========
+        function start() {
+            resize();
+            resetGame();
+            updateJoystickCenters();
+            document.getElementById('menu').style.display = 'none';
+            document.getElementById('game').style.display = 'block';
+            if(!animId) {
+                lastTime = performance.now();
+                animId = requestAnimationFrame(gameLoop);
+            }
+        }
+        
+        function backToMenu() {
+            gameRunning = false;
+            if(timerInterval) clearInterval(timerInterval);
+            if(animId) cancelAnimationFrame(animId);
+            animId = null;
+            document.getElementById('menu').style.display = 'flex';
+            document.getElementById('game').style.display = 'none';
+        }
+        
+        // ========== TUGMALAR ==========
+        document.getElementById('startBtn').onclick = start;
+        document.getElementById('backBtn').onclick = backToMenu;
+        document.getElementById('restartBtn').onclick = () => { if(gameRunning) resetGame(); };
+        
+        // P1
+        document.getElementById('kick1').onclick = () => { if(gameRunning) kickToEnemyGoal(p1, false); };
+        document.getElementById('steal1').onclick = () => { if(gameRunning) stealBall(p1, p2); };
+        
+        document.getElementById('power1').addEventListener('touchstart', (e) => { e.preventDefault(); power1Active = true; });
+        document.getElementById('power1').addEventListener('touchend', (e) => { 
+            e.preventDefault(); 
+            if(power1Active && gameRunning) kickToEnemyGoal(p1, true, power1Charge);
+            power1Active = false; power1Charge = 0; 
+        });
+        document.getElementById('power1').onmousedown = () => { power1Active = true; };
+        document.getElementById('power1').onmouseup = () => { 
+            if(power1Active && gameRunning) kickToEnemyGoal(p1, true, power1Charge);
+            power1Active = false; power1Charge = 0; 
+        };
+        
+        // P2
+        document.getElementById('kick2').onclick = () => { if(gameRunning && gameMode === '2p') kickToEnemyGoal(p2, false); };
+        document.getElementById('steal2').onclick = () => { if(gameRunning && gameMode === '2p') stealBall(p2, p1); };
+        
+        document.getElementById('power2').addEventListener('touchstart', (e) => { e.preventDefault(); power2Active = true; });
+        document.getElementById('power2').addEventListener('touchend', (e) => { 
+            e.preventDefault(); 
+            if(power2Active && gameRunning && gameMode === '2p') kickToEnemyGoal(p2, true, power2Charge);
+            power2Active = false; power2Charge = 0; 
+        });
+        document.getElementById('power2').onmousedown = () => { power2Active = true; };
+        document.getElementById('power2').onmouseup = () => { 
+            if(power2Active && gameRunning && gameMode === '2p') kickToEnemyGoal(p2, true, power2Charge);
+            power2Active = false; power2Charge = 0; 
+        };
+        
+        // Mode
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.onclick = () => {
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                gameMode = btn.dataset.mode;
+            };
+        });
+    })();
+</script>
+</body>
+</html>
